@@ -1,0 +1,3 @@
+300 shot early
+340 shot later
+341 quit

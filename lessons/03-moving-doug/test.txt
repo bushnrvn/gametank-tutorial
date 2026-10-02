@@ -1,0 +1,8 @@
+# walk right for 30 steps, then push down: Doug is in the middle of a cell, so he has to slide to the next lane before he can turn
+300 RIGHT
+360 DOWN
+400 0
+410 peek px
+410 peek py
+410 shot corner
+420 quit

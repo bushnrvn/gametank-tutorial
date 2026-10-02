@@ -1,0 +1,9 @@
+# Is the music player running? It writes the volume of each of the 16 FM operators to $3030-$303F in the sound chip's memory,
+# so those bytes change as the notes of the tune start and end. (They would sit still if the music were stopped.)
+300 peek 0x3030 16
+315 peek 0x3030 16
+330 peek 0x3030 16
+345 peek 0x3030 16
+360 peek 0x3030 16
+360 shot playing
+361 quit

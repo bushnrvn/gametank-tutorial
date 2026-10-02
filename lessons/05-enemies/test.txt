@@ -1,0 +1,14 @@
+# Doug stands still in his shaft. Dig a way (cells (6,3), (6,4), (6,5)) from his shaft into the first cave, by poking the map.
+300 shot sealed
+300 poke map 0 54
+300 poke map 0 70
+300 poke map 0 86
+300 peek lives
+380 peek e_x 3
+380 peek e_y 3
+400 shot hunting
+# a few seconds later the first Vumpire has walked up the tunnel and caught him
+700 peek lives
+700 peek e_x 3
+700 peek e_y 3
+701 quit

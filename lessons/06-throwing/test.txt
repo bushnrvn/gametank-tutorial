@@ -1,0 +1,20 @@
+# Put Doug at the right-hand end of the first cave, facing left, with the Vumpire two cells away from him (the Vumpires wander,
+# so we place it), and throw three baseballs.
+300 poke px 40
+300 poke py 40
+300 poke pdir 1
+300 poke e_x 24 0
+300 poke e_y 40 0
+310 A
+314 0
+330 A
+334 0
+336 shot struck
+350 A
+354 0
+360 peek e_state 3
+360 peek e_infl 3
+360 peek score
+360 shot out
+420 peek e_state 3
+421 quit

@@ -1,0 +1,15 @@
+# Run 1: title, start a game, then make Doug score 1230 and get caught on his last life, so the game ends with a new best score.
+300 shot title
+300 peek state
+310 START
+312 0
+340 poke lives 1
+340 poke score 206 0
+340 poke score 4 1
+345 poke e_x 48 0
+345 poke e_y 16 0
+520 peek state
+520 peek best_score 2
+520 peek saved_best 2
+520 shot over
+521 quit

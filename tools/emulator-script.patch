@@ -1,0 +1,135 @@
+--- a/src/gte.cpp
++++ b/src/gte.cpp
+@@ -92,6 +92,8 @@
+ 
+ #define MAX_FRAME_FLIP_PROFILE_VSYNCS 8
+ 
++long gt_total_flips = 0;
++long long gt_pix_sum = 0;
+ bool vsyncProfileArmed = false;
+ bool vsyncProfileRunning = false;
+ bool frameFlipProfileArmed = false;
+@@ -551,7 +553,7 @@
+ 			if((address & 0x000F) == 0x0007) {
+ 				blitter->CatchUp();
+ 				if((value & DMA_VID_OUT_PAGE_BIT) != (system_state.dma_control & DMA_VID_OUT_PAGE_BIT)) {
+-					profiler.bufferFlipCount++;
++					profiler.bufferFlipCount++; gt_total_flips++;
+ 					if(profiler.measure_by_frameflip) {
+ 						profiler.ResetTimers();
+ 						profiler.last_blitter_activity = blitter->pixels_this_frame;
+@@ -594,6 +596,51 @@
+ SDL_Event e;
+ bool running = true;
+ bool gofast = false;
++
++// ---- Dug Out test harness (local patch): scripted input + screenshots ----
++#include <fstream>
++#include <sstream>
++struct GtScriptEv { long frame; int kind; unsigned mask; std::string name; };
++static std::vector<GtScriptEv> gt_script;
++static size_t gt_script_idx = 0;
++static long gt_vframe = 0;
++static std::string gt_pending_shot;
++static bool gt_quit_req = false;
++static long gt_last_flips = 0;
++static unsigned gt_parse_mask(const std::string& t) {
++	unsigned m = 0; std::string cur; std::string tt = t + "+";
++	for(char c : tt) {
++		if(c == '+') {
++			if(cur == "UP") m |= 0b0000100000001000;
++			else if(cur == "DOWN") m |= 0b0000010000000100;
++			else if(cur == "LEFT") m |= 0b0000001000000000;
++			else if(cur == "RIGHT") m |= 0b0000000100000000;
++			else if(cur == "A") m |= 0b0000000000010000;
++			else if(cur == "B") m |= 0b0001000000000000;
++			else if(cur == "C") m |= 0b0010000000000000;
++			else if(cur == "START") m |= 0b0000000000100000;
++			cur.clear();
++		} else cur += c;
++	}
++	return m;
++}
++static void gt_script_init() {
++	if(getenv("GT_FAST")) gofast = true;
++	const char* f = getenv("GT_SCRIPT");
++	if(!f) return;
++	std::ifstream in(f); std::string line;
++	while(std::getline(in, line)) {
++		std::istringstream ls(line); std::string a, b, c; ls >> a >> b >> c;
++		if(a.empty() || a[0] == '#') continue;
++		GtScriptEv ev; ev.frame = atol(a.c_str()); ev.mask = 0;
++		if(b == "shot") { ev.kind = 1; ev.name = c; }
++		else if(b == "quit") { ev.kind = 2; }
++		else if(b == "poke") { ev.kind = 4; ev.mask = strtoul(c.c_str(), NULL, 16); std::string d2; ls >> d2; ev.name = d2; }
++		else if(b == "peek") { ev.kind = 3; ev.name = c; std::string d2; ls >> d2; ev.mask = strtoul(c.c_str(), NULL, 16); ev.frame = atol(a.c_str()); ev.name = d2; }
++		else { ev.kind = 0; ev.mask = gt_parse_mask(b); }
++		gt_script.push_back(ev);
++	}
++}
+ bool paused = true;
+ bool lshift = false;
+ bool rshift = false;
+@@ -1208,7 +1255,35 @@
+ 	ImGui::Render();
+ 	ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), mainRenderer);
+ #endif
++	if(!gt_pending_shot.empty()) {
++		SDL_Surface *shot = SDL_CreateRGBSurface(0, viewport_width(display_scale), viewport_height(display_scale), 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
++		SDL_RenderReadPixels(mainRenderer, NULL, SDL_PIXELFORMAT_ARGB8888, shot->pixels, shot->pitch);
++		SDL_SaveBMP(shot, gt_pending_shot.c_str());
++		SDL_FreeSurface(shot);
++		printf("SHOT %s at vframe %ld\n", gt_pending_shot.c_str(), gt_vframe);
++		gt_pending_shot.clear();
++	}
+ 	SDL_RenderPresent(mainRenderer);
++}
++
++
++static void gt_script_tick() {
++	++gt_vframe;
++	gt_pix_sum += blitter->pixels_this_frame;
++	if(getenv("GT_FPS") && (gt_vframe % 120) == 0) { printf("vframe %ld flips/120=%ld blitpix/frame=%ld\n", gt_vframe, gt_total_flips - gt_last_flips, (long)(gt_pix_sum/120)); gt_pix_sum=0; gt_last_flips = gt_total_flips; }
++	while(gt_script_idx < gt_script.size() && gt_script[gt_script_idx].frame <= gt_vframe) {
++		GtScriptEv& ev = gt_script[gt_script_idx++];
++		if(ev.kind == 0) { joysticks->SetHeldButtons(ev.mask); }
++		else if(ev.kind == 1) { gt_pending_shot = ev.name; }
++		else if(ev.kind == 2) { gt_quit_req = true; }
++		else if(ev.kind == 4) { MemoryWrite((uint16_t)ev.mask, (uint8_t)atoi(ev.name.c_str())); }
++		else if(ev.kind == 3) {
++			int len = atoi(ev.name.c_str()); if(len <= 0) len = 1;
++			printf("PEEK f%ld %04X:", gt_vframe, ev.mask);
++			for(int k = 0; k < len; ++k) printf(" %d", MemoryRead((uint16_t)(ev.mask + k)));
++			printf("\n");
++		}
++	}
+ }
+ 
+ char titlebuf[256];
+@@ -1357,6 +1432,7 @@
+ 			timekeeper.cycles_since_vsync += intended_cycles;
+ 			if(timekeeper.cycles_since_vsync >= timekeeper.cycles_per_vsync) {
+ 				timekeeper.cycles_since_vsync -= timekeeper.cycles_per_vsync;
++				gt_script_tick();
+ 				if(system_state.dma_control & DMA_VSYNC_NMI_BIT) {
+ 					cpu_core->NMI();
+ 					if(vsyncProfileArmed) {
+@@ -1587,7 +1663,7 @@
+ }
+ 
+ int main(int argC, char* argV[]) {
+-	srand(time(NULL));
++	srand(getenv("GT_SCRIPT") ? 1 : time(NULL));   // scripted runs are repeatable
+ 	cartridge_state.rom = new uint8_t[1 << 21];
+ 
+ 	const char* rom_file_name = NULL;
+@@ -1703,7 +1779,9 @@
+ #else
+ 	PaddleInit();
+ 	SDL_RaiseWindow(mainWindow);
++	gt_script_init();
+ 	while(running) {
++		if(gt_quit_req) running = false;
+ 		mainloop(0, NULL);
+ 	}
+ 	joysticks->SaveBindings();

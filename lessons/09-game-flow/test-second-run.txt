@@ -1,0 +1,4 @@
+# Run 2, a fresh start of the same ROM: has the best score survived? (the title screen shows BEST, and best_score is read from flash)
+300 peek best_score 2
+300 shot title-again
+301 quit

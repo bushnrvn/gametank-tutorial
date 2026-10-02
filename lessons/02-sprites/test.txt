@@ -1,0 +1,3 @@
+300 shot a
+312 shot b
+313 quit

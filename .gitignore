@@ -1,0 +1,8 @@
+/sdk/
+/build/
+/bin/
+/GameTankEmulator/
+*.xor
+.DS_Store
+__pycache__/
+/dugout/

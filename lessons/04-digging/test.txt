@@ -1,0 +1,7 @@
+# dig down the shaft, then sideways
+300 DOWN
+420 RIGHT
+520 0
+530 peek score
+530 shot dug
+531 quit
