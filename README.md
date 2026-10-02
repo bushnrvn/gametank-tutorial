@@ -54,8 +54,7 @@ For lesson 11 (automatic testing) also run `./setup-emulator.sh`, which builds t
 ## Credits
 
 The GameTank is by Clyde Shaffer, and so are the [SDK](https://github.com/clydeshaffer/gametank_sdk) and the
-[emulator](https://github.com/clydeshaffer/GameTankEmulator) this builds on; neither is included here, only fetched.
-The tutorial text, the lesson programs, the art, the music and the tools in this repository are by bushnrvn.
+[emulator](https://github.com/clydeshaffer/GameTankEmulator) this builds on; neither is included here.
 
 ## Licence
 
