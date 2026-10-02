@@ -28,17 +28,18 @@ a Dig Dug-style game about a baseball player digging up vampires. The last step 
 
 ## Using it
 
-You need `cc65` (a recent snapshot), `make`, `git`, `node`, `python3` and `zopfli`. Then:
+You need the [GameTank SDK](https://github.com/clydeshaffer/gametank_sdk) and whatever it needs (`cc65`, `make`, `node`,
+`python3`, `zopfli`; see its README). Put the SDK in `./sdk` next to `build.sh`, or point `SDK_DIR` at a checkout you already have
+(the lessons were written against commit `18b281f`). Then:
 
 ```bash
-./setup.sh                              # fetches the GameTank SDK into ./sdk, at the version used here
 ./build.sh lessons/01-the-screen        # builds bin/01-the-screen.gtr
 ```
 
 Open `bin/01-the-screen.gtr` in a GameTank emulator, or put it on a cartridge. Every lesson builds the same way, and lesson *n*'s
 code is lesson *n-1*'s code plus what the walkthrough describes (compare them with `diff`).
 
-For lesson 11 (automatic testing) also run `./setup-emulator.sh`, which builds the emulator with a small scripting patch.
+Lesson 11 (automatic testing) needs the [GameTank emulator](https://github.com/clydeshaffer/GameTankEmulator) with a small scripting patch; the lesson says how.
 
 ## How the repository works
 

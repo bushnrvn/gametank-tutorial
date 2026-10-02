@@ -13,9 +13,11 @@ thirty seconds for you.
 ## What you need
 
 The stock emulator has no scripting, so there is a small patch for it (`tools/emulator-script.patch`: it reads a script from an
-environment variable, can run as fast as the computer allows, and exits when told). `./setup-emulator.sh` fetches the emulator
-(at the version the patch was made for), applies it, and builds it into `./GameTankEmulator`. It is only needed for testing: the
-lessons run on any GameTank emulator or on hardware.
+environment variable, can run as fast as the computer allows, and exits when told). To use it, get the
+[GameTank emulator](https://github.com/clydeshaffer/GameTankEmulator), check out commit `9896544` (the version the patch was made
+for), apply the patch from inside it with `patch -p1 < ../tools/emulator-script.patch`, and build it as its README says. Put the
+result at `./GameTankEmulator/bin/GameTankEmulator` next to `build.sh`, or set `GTE` to its path. It is only needed for testing:
+the lessons run on any GameTank emulator or on hardware.
 
 ## A scenario
 
