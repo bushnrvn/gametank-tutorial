@@ -6,7 +6,6 @@ Draws the sprites the lessons use (Doug, a Vumpire, a gold bar) and writes them 
   art.h     where each frame sits on the page, as C arrays, so the game can say "frame 3 of Doug" instead of "x=24, y=0"
 
   python3 art/make_art.py <folder>      writes <folder>/assets/spr/spr.bmp and <folder>/src/art.h
-  ./art/install.sh                      does that for every lesson from 02 on
 
 The pictures are ASCII art: one letter per pixel, "." is see-through. Each letter stands for a colour in the tables below, and every
 colour is snapped to the nearest of the GameTank's 256 palette colours (colour 0 is reserved: it means "transparent").

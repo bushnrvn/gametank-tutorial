@@ -23,7 +23,7 @@ SDK's tools, into a file in the cartridge and a C name for it (`ASSET__spr__spr_
 The blitter copies from "graphics RAM" to the screen. Before you can
 draw a sprite you have to copy the sheet into graphics RAM, which is `allocate_sprite`: it returns a *slot* that you pass to every
 `queue_draw_sprite`. A 128 x 128 sheet takes a quarter of one page, and the slot remembers which quarter. That copy takes a
-moment (it is a few thousand bytes), so it is done before the loop, not in it.
+moment (it is 16K bytes), so it is done before the loop, not in it.
 
 **`queue_draw_sprite(x, y, w, h, gx, gy, slot)`** copies a `w` x `h` rectangle whose top left corner is at `(gx, gy)` on the sheet
 to `(x, y)` on the screen. Colour 0 is transparent: that is how a round sprite sits on a background.

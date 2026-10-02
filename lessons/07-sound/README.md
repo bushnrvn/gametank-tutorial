@@ -7,9 +7,9 @@ music in time.
 
 ## How the GameTank makes sound
 
-Sound has its own processor, a second 6502 with its own RAM, running a small program the SDK ships: a four-voice software FM synthesiser
+Sound has its own processor, a second processor with its own RAM, running a small program the SDK ships: a four-voice software FM synthesiser
 (each voice is four "operators" that modulate one another). The main CPU never makes noise itself: it
-**writes requests into a shared page of that RAM** (`$3000-$3FFF`), and the sound CPU does the rest. On the main side the SDK
+**writes requests into that RAM**, which the main CPU sees at `$3000-$3FFF`, and the sound CPU does the rest. On the main side the SDK
 gives you:
 
 * `play_song(song, REPEAT_LOOP)`, a MIDI tune
@@ -40,11 +40,11 @@ getting caught (4) beats everything, putting a Vumpire out (3) beats the hit it 
 ## The tune drags! (and the fix)
 
 The game runs at 30 frames a second, but the music needs 60 ticks a second. So the loop calls `tick_music()` twice a frame, once after
-each vsync. That is fine until a frame takes longer than two vsyncs (a busy frame when several Vumpires are on screen is enough):
+each vsync. That is fine until a frame takes longer than two vsyncs (this happened in testing while Doug was digging):
 `await_vsync` then returns at the *next* vsync it sees, and the one that passed in the middle is never counted, so the tune slows
 down by exactly the frames you lost. The SDK has no way to count vsyncs, so this lesson adds one with a tiny patch to the SDK's
 copy that the build applies for you (`sdk-patches` and `tools/sdk_patch.py`): the NMI handler, which runs on every vsync, adds one
-to a byte in the shared sound RAM.
+to a byte in that RAM, at `$3210`.
 
 ```c
 /* The SDK keeps no count of vsyncs, so lesson 7 adds one (see sdk-patches and tools/sdk_patch.py): the NMI handler adds one to the byte
@@ -69,9 +69,9 @@ unsigned char music_poll(void)
         music_poll();
 ```
 
-> **Why in the sound RAM and not an ordinary variable?** The draw queue keeps its lists in a second bank of RAM which the
-> program switches in for a few instructions at a time, many times a frame. If the NMI arrives in one of those moments, a normal
-> variable would be written to the wrong bank. The shared page is the same whichever bank is switched in.
+> **Why in the sound RAM and not an ordinary variable?** The SDK's draw queue switches a second bank of RAM in for short moments
+> while it works. The SDK's own NMI counter is skipped when that bank is in, so it can miss vsyncs. A byte in the sound RAM is
+> there whichever bank is switched in, so this counter never misses. (I have not checked this against every SDK version.)
 
 ## Gotchas
 

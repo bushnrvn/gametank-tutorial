@@ -9,9 +9,9 @@ him and walk it. If one touches Doug he loses a life.
 
 ## Many things with the same fields
 
-Three enemies, each with a position, a direction, and so on. The natural C is an array of structs. On a 6502 it is the wrong
-tool: reaching the field of element `i` of an array of structs means multiplying `i` by the struct size, and cc65 has no
-multiply instruction to use. So the fields are kept in **parallel arrays**, one per field (`e_x[i]`, `e_y[i]`, `e_dir[i]`):
+Three enemies, each with a position, a direction, and so on. The natural C is an array of structs. On a 6502 it tends to be the wrong
+tool: reaching the field of element `i` of an array of structs means multiplying `i` by the struct size, and the 6502 has no
+multiply instruction. So the fields are kept in **parallel arrays**, one per field (`e_x[i]`, `e_y[i]`, `e_dir[i]`):
 element `i` is then just `base + i`.
 
 ## Finding the way: breadth first search
@@ -43,8 +43,8 @@ speeds that are not whole pixels on hardware with no decimals. You will use it a
 
 * **Signed vs unsigned.** `open_cell(c, r)` takes `signed char`s. Column `-1` would be `255` as a byte and look like a valid cell
   far off the edge. The casts in the code are there for that.
-* **The recursion you did not write.** Search by recursion would overflow the 6502's tiny stack (it is 256 bytes shared with
-  everything); the queue is a plain array instead.
+* **No recursion.** The search keeps its own queue in a plain array. Recursion is expensive for cc65 code (every call and local
+  variable costs time and memory), and a plain loop is easier to follow.
 
 ## Try it
 

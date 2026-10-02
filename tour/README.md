@@ -1,8 +1,10 @@
 # Lesson 12: a tour of the finished game
 
-The lessons built a small game from nothing. **Dug Out** is the big one: nine innings, five kinds of enemy, a boss, a digging field
-that reshapes itself, and a soundtrack. It is one 1,800-line C file, written with exactly the tools in lessons 1 to 11, and this
-chapter walks through how it does the things the lessons only hinted at. Read it with the source open:
+The lessons built a small teaching game. **Dug Out** is a bigger, separate game: nine innings, five kinds of enemy, a boss, a
+digging field that reshapes itself, and a soundtrack. It is one 1,800-line C file that uses the same techniques as the lessons
+(and some they leave out). It was not built by following these lessons: it grew over many versions, and the lesson game is a
+simplified rewrite. This chapter points at the places where the real game does things the lessons only hint at. Read it with the
+source open:
 
 * the game: <https://github.com/bushnrvn/dug-out> (this chapter is checked against tag `v1.4.0`)
 * its MEGA65 port: <https://github.com/bushnrvn/dug-out-mega65>
@@ -356,7 +358,7 @@ The same fixed-bank read as lesson 9, because the save lives in its own bank.
 ## The MEGA65 port
 
 The same game runs on a MEGA65 (a modern 6502-family computer, a 45GS02 at 40 MHz with a VIC-IV video chip): the *game logic* is the
-same C, the drawing, sound and input are rewritten for that machine, with the GameTank's blitter replaced by the CPU and DMA. If you
+same C, and the drawing, sound and input are rewritten for that machine (its `src/blit.s` does the work the GameTank's blitter does). If you
 liked lesson 8's "the hardware decides how your program is laid out", read `docs/PORT-NOTES.md` in that repository: it is a list of
 the places where real hardware disagreed with the emulator, which is the most reliable teacher there is.
 

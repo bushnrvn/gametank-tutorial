@@ -7,11 +7,11 @@ Small changes to the SDK's own engine files, applied to the build copy of the SD
 vsync-counter: the SDK has no way to count vsyncs. await_vsync() only waits for the NEXT one, so when a frame takes longer than you
 meant (say it needs 3 vsyncs when you asked for 2) the extra one passes unseen, and anything that keeps time by counting calls to
 it (the music!) runs slow. This change makes the NMI handler (which runs on every vsync) add one to a byte at $3210 in the audio
-RAM's shared page, which every part of the program can see whatever RAM bank is switched in. A lesson that asks for the change lists
+RAM (the part the main CPU can see, at $3000-$3FFF), which every part of the program can see whatever RAM bank is switched in. A lesson that asks for the change lists
 "vsync-counter" in a file called sdk-patches next to its code/ folder.
 
 Why $3210 and not an ordinary variable: the draw queue keeps its lists in RAM bank 1 and switches that bank in for a moment, many
-times a frame. If the NMI lands in that moment, an ordinary variable would be written in the wrong bank. The shared page is the same
+times a frame. If the NMI lands in that moment, an ordinary variable would be written in the wrong bank. That RAM is the same
 in every bank. (The SDK's NMI handler already skips its own counter when bank 1 is switched in, which is why it has a marker byte at
 $1FFF; the change below also puts the marker where the SDK forgot to.)
 """
@@ -30,7 +30,7 @@ def vsync_counter(work):
     edit(os.path.join(gt, 'interrupt.s'), r'\.import\s+_frameflag\n', '.import   _frameflag\n.import   _vsync_ctr\n')
     edit(os.path.join(gt, 'interrupt.s'),
          r'_nmi_int:\n\s+PHA\n\s+LDA \$1FFF\n\s+BNE nmi_done\n\s+STZ _frameflag\nnmi_done:',
-         '''; VSYNC_RAW lives in the audio RAM "share" page ($3200-$32FF is reserved for the main CPU), which is visible whichever
+         '''; VSYNC_RAW lives in the audio RAM, which the main CPU sees at $3000-$3FFF, and which is visible whichever
 ; RAM bank is mapped. It is counted on every vsync; the other two variables are skipped when the draw queue's RAM bank is mapped.
 VSYNC_RAW = $3210
 

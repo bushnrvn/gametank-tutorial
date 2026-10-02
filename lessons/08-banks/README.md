@@ -13,8 +13,7 @@ The 6502 can only see 64K at once and a GameTank cartridge can be 2M. The cartri
 switched into the window at `$8000-$BFFF`; the top 16K (`$C000-$FFFF`, the **fixed bank**) is always there, and is where the SDK's
 code, the interrupt handlers and the first thing that runs live.
 
-In `project.json`, `"progbanks": 2` asks the build for two program banks (`PROG0` and `PROG1`) besides the fixed one and the
-sound/graphics ones, and `make import` writes `gen/bank_nums.h` with their numbers.
+In `project.json`, `"progbanks": 2` asks the build for two program banks, `PROG0` and `PROG1`, in addition to the fixed bank, and `make import` writes `gen/bank_nums.h` with their numbers.
 
 ```json
 {
