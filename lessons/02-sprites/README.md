@@ -72,7 +72,7 @@ void main(void)
 
 ## What is going on
 
-**Sprites live in a separate memory, not in the picture.** The blitter copies from "graphics RAM" to the screen. Before you can
+The blitter copies from "graphics RAM" to the screen. Before you can
 draw a sprite you have to copy the sheet into graphics RAM, which is `allocate_sprite`: it returns a *slot* that you pass to every
 `queue_draw_sprite`. A 128 x 128 sheet takes a quarter of one page, and the slot remembers which quarter. That copy takes a
 moment (it is a few thousand bytes), so it is done before the loop, not in it.
